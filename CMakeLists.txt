@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project("eval-conan-strings" VERSION 1.0.0)
+project("exqudens-cpp-eval-conan-strings" VERSION 1.0.0)
 
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
@@ -8,9 +8,14 @@ if(${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
 endif()
 
 set(CMAKE_CONAN_PACKAGE_SHARED "False")
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 if(${BUILD_SHARED_LIBS})
     set(CMAKE_CONAN_PACKAGE_SHARED "True")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 endif()
+
+set(CMAKE_OBJECT_PATH_MAX 1000)
+set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory("library-${CMAKE_PROJECT_NAME}")
 add_subdirectory("test-${CMAKE_PROJECT_NAME}")

@@ -8,7 +8,8 @@ add_custom_target(${PROJECT_NAME}-conan-install
             install
             "${CMAKE_CURRENT_SOURCE_DIR}"
             --install-folder="${CMAKE_CURRENT_BINARY_DIR}"
-            --options "library-eval-conan-strings:shared=${CMAKE_CONAN_PACKAGE_SHARED}"
+            #--options "fmt:shared=${CMAKE_CONAN_PACKAGE_SHARED}"
+            --options "library-${CMAKE_PROJECT_NAME}:shared=${CMAKE_CONAN_PACKAGE_SHARED}"
     COMMENT "execute: '${PROJECT_NAME}-conan-install'"
 )
 
@@ -18,8 +19,6 @@ if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake")
 endif()
 include("${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup()
-
-set(CMAKE_CXX_STANDARD 20)
 
 add_executable(${PROJECT_NAME}-executable "src/test/cpp/main.cpp")
 target_link_libraries(${PROJECT_NAME}-executable PRIVATE
@@ -32,7 +31,6 @@ add_custom_target(${PROJECT_NAME}
             env
             PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             "$<TARGET_FILE:${PROJECT_NAME}-executable>"
-            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<TARGET_FILE:${PROJECT_NAME}-executable>"
     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-    COMMENT "execute: '$<TARGET_PROPERTY:NAME>'"
+    COMMENT "execute: '${PROJECT_NAME}'"
 )

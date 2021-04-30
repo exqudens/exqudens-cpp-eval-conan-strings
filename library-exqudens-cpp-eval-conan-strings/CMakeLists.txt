@@ -39,9 +39,6 @@ endif()
 include("${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup()
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-set(CMAKE_CXX_STANDARD 20)
-
 add_library(${PROJECT_NAME}-object OBJECT
     "src/main/cpp/exqudens/evaluation/Strings.hpp"
     "src/main/cpp/exqudens/evaluation/Strings.cpp"
