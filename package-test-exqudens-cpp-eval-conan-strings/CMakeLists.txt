@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project("test-${CMAKE_PROJECT_NAME}" VERSION ${CMAKE_PROJECT_VERSION})
+project("package-test-${CMAKE_PROJECT_NAME}" VERSION ${CMAKE_PROJECT_VERSION})
 
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
@@ -22,7 +22,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_LIBRARY_OUTPUT_DIRECT
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 set(PROJECT_PATH_LIST
-    "${CMAKE_BINARY_DIR}/library-${CMAKE_PROJECT_NAME}/bin"
+    "${CMAKE_CURRENT_BINARY_DIR}/packages/library-${CMAKE_PROJECT_NAME}/bin"
     "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
 )
 cmake_path(CONVERT "${PROJECT_PATH_LIST}" TO_NATIVE_PATH_LIST PROJECT_NATIVE_PATH_LIST NORMALIZE)
@@ -46,34 +46,23 @@ add_custom_target("${PROJECT_NAME}-conan-install"
             --install-folder
             "${CMAKE_CURRENT_BINARY_DIR}"
             #--options "fmt:shared=${CMAKE_CONAN_PACKAGE_SHARED}"
-            #--options "library-${CMAKE_PROJECT_NAME}:shared=${CMAKE_CONAN_PACKAGE_SHARED}"
+            --options "library-${CMAKE_PROJECT_NAME}:shared=${CMAKE_CONAN_PACKAGE_SHARED}"
     COMMENT "execute: '${PROJECT_NAME}-conan-install'"
 )
 
-add_library("${PROJECT_NAME}-interface" INTERFACE
-    "src/test/cpp/exqudens/evaluation/StringsTests.hpp"
-)
-target_include_directories("${PROJECT_NAME}-interface" INTERFACE
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/test/cpp>"
-    "$<INSTALL_INTERFACE:${PROJECT_NAME}-${PROJECT_VERSION}/include>"
-)
-target_link_libraries("${PROJECT_NAME}-interface" INTERFACE
-    "library-exqudens-cpp-eval-conan-strings"
-)
-
 add_executable("${PROJECT_NAME}-executable" "src/test/cpp/main.cpp")
-#[[target_include_directories("${PROJECT_NAME}-executable" PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/packages/fmt/include"
+target_include_directories("${PROJECT_NAME}-executable" PUBLIC
+    #"${CMAKE_CURRENT_BINARY_DIR}/packages/fmt/include"
     "${CMAKE_CURRENT_BINARY_DIR}/packages/library-exqudens-cpp-eval-conan-strings/include"
-)]]
-#[[target_link_directories("${PROJECT_NAME}-executable" PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/packages/fmt/lib"
+)
+target_link_directories("${PROJECT_NAME}-executable" PUBLIC
+    #"${CMAKE_CURRENT_BINARY_DIR}/packages/fmt/lib"
     "${CMAKE_CURRENT_BINARY_DIR}/packages/library-exqudens-cpp-eval-conan-strings/lib"
-)]]
+)
 target_link_libraries("${PROJECT_NAME}-executable" PUBLIC
-    "${PROJECT_NAME}-interface"
     #"fmt"
-    #"library-exqudens-cpp-eval-conan-strings"
+    "library-exqudens-cpp-eval-conan-strings"
+    "test-${CMAKE_PROJECT_NAME}-interface"
 )
 if(${BUILD_SHARED_LIBS})
     get_filename_component(CXX_COMPILER_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
