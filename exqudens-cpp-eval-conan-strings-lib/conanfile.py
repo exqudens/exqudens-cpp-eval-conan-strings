@@ -3,7 +3,7 @@ from os import path
 
 
 class ConanConfiguration(ConanFile):
-    name = "lib-exqudens-cpp-eval-conan-strings"
+    name = "exqudens-cpp-eval-conan-strings-lib"
     settings = "arch", "os", "compiler", "build_type"
     options = {"shared": [True, False]}
     default_options = {"shared": True}

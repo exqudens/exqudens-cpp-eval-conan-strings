@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../version.txt" RAW_VERSION)
 string(STRIP "${RAW_VERSION}" VERSION)
-project("lib-exqudens-cpp-eval-conan-strings" VERSION ${VERSION})
+project("exqudens-cpp-eval-conan-strings-lib" VERSION ${VERSION})
 
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
@@ -45,70 +45,70 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_LIBRARY_OUTPUT_DIRECT
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
-if(DEFINED CMAKE_CONAN_PROGRAM)
+if(DEFINED CONAN_PROGRAM)
+    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+        set(CONAN_SETTINGS --settings "os=${CMAKE_SYSTEM_NAME}")
+    elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+        set(CONAN_SETTINGS --settings "os=${CMAKE_SYSTEM_NAME}")
+    elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+        set(CONAN_SETTINGS --settings "os=Macos")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_NAME: '${CMAKE_SYSTEM_NAME}'")
+    endif()
 
-    set(CMAKE_CONAN_SETTINGS_OS "Windows")
-    set(CMAKE_CONAN_SETTINGS_OS_BUILD "Windows")
-    set(CMAKE_CONAN_SETTINGS_ARCH "x86_64")
-    set(CMAKE_CONAN_SETTINGS_ARCH_BUILD "x86_64")
-    set(CMAKE_CONAN_SETTINGS_COMPILER "Visual Studio")
-    set(CMAKE_CONAN_SETTINGS_COMPILER_VERSION "16")
-    set(CMAKE_CONAN_SETTINGS_BUILD_TYPE "Release")
-
-    set(CMAKE_CONAN_OPTIONS_SHARED "False")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64")
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "arch=x86_64")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_PROCESSOR: '${CMAKE_SYSTEM_PROCESSOR}'")
+    endif()
 
     if(
-        NOT "${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows"
-        OR NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows"
-        OR NOT "${CMAKE_HOST_SYSTEM_PROCESSOR}" STREQUAL "AMD64"
-        OR NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "AMD64"
+        "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"
+        AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER_EQUAL "19"
     )
-        message(WARNING "----------")
-        message(WARNING "CMAKE_HOST_SYSTEM_NAME: '${CMAKE_HOST_SYSTEM_NAME}'")
-        message(WARNING "CMAKE_SYSTEM_NAME: '${CMAKE_SYSTEM_NAME}'")
-        message(WARNING "CMAKE_HOST_SYSTEM_PROCESSOR: '${CMAKE_HOST_SYSTEM_PROCESSOR}'")
-        message(WARNING "CMAKE_SYSTEM_PROCESSOR: '${CMAKE_SYSTEM_PROCESSOR}'")
-        message(WARNING "----------")
-        message(FATAL_ERROR "Some setting is not supported!")
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "compiler=Visual Studio")
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "compiler.version=16")
+    elseif(
+        "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
+        AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER_EQUAL "10"
+    )
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "compiler=gcc")
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "compiler.version=10")
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "compiler.libcxx=libstdc++11")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_CXX_COMPILER_ID: '${CMAKE_CXX_COMPILER_ID}' and CMAKE_CONAN_SETTINGS_COMPILER_VERSION: '${CMAKE_CONAN_SETTINGS_COMPILER_VERSION}'")
     endif()
 
     if(${BUILD_SHARED_LIBS})
-        set(CMAKE_CONAN_OPTIONS_SHARED "True")
+        set(CONAN_OPTIONS_SHARED "True")
+    else()
+        set(CONAN_OPTIONS_SHARED "False")
     endif()
 
+    set(CONAN_OPTIONS --options "shared=${CONAN_OPTIONS_SHARED}")
+
     add_custom_target("${PROJECT_NAME}-conan-export-testing"
-        COMMAND "${CMAKE_CONAN_PROGRAM}"
+        COMMAND "${CONAN_PROGRAM}"
                 export-pkg
                 -f
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 test-user/test-channel
                 --package-folder
                 "${CMAKE_INSTALL_PREFIX}"
-                --settings "os=${CMAKE_CONAN_SETTINGS_OS}"
-                --settings "os_build=${CMAKE_CONAN_SETTINGS_OS_BUILD}"
-                --settings "arch=${CMAKE_CONAN_SETTINGS_ARCH}"
-                --settings "arch_build=${CMAKE_CONAN_SETTINGS_ARCH_BUILD}"
-                --settings "compiler=${CMAKE_CONAN_SETTINGS_COMPILER}"
-                --settings "compiler.version=${CMAKE_CONAN_SETTINGS_COMPILER_VERSION}"
-                --settings "build_type=${CMAKE_CONAN_SETTINGS_BUILD_TYPE}"
-                --options "shared=${CMAKE_CONAN_OPTIONS_SHARED}"
+                ${CONAN_SETTINGS}
+                ${CONAN_OPTIONS}
         COMMENT "execute: '${PROJECT_NAME}-conan-export-testing'"
+        VERBATIM
     )
 
     add_custom_target("${PROJECT_NAME}-conan-export"
-        COMMAND "${CMAKE_CONAN_PROGRAM}"
+        COMMAND "${CONAN_PROGRAM}"
                 export-pkg
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 --package-folder
                 "${CMAKE_INSTALL_PREFIX}"
-                --settings "os=${CMAKE_CONAN_SETTINGS_OS}"
-                --settings "os_build=${CMAKE_CONAN_SETTINGS_OS_BUILD}"
-                --settings "arch=${CMAKE_CONAN_SETTINGS_ARCH}"
-                --settings "arch_build=${CMAKE_CONAN_SETTINGS_ARCH_BUILD}"
-                --settings "compiler=${CMAKE_CONAN_SETTINGS_COMPILER}"
-                --settings "compiler.version=${CMAKE_CONAN_SETTINGS_COMPILER_VERSION}"
-                --settings "build_type=${CMAKE_CONAN_SETTINGS_BUILD_TYPE}"
-                --options "shared=${CMAKE_CONAN_OPTIONS_SHARED}"
+                ${CONAN_SETTINGS}
+                ${CONAN_OPTIONS}
         COMMENT "execute: '${PROJECT_NAME}-conan-export'"
     )
 endif()

@@ -8,7 +8,7 @@ def get_version():
 
 class ConanConfiguration(ConanFile):
     requires = [
-        "lib-exqudens-cpp-eval-conan-strings/" + get_version() + "@test-user/test-channel"
+        "exqudens-cpp-eval-conan-strings-lib/" + get_version() + "@test-user/test-channel"
     ]
     settings = "arch", "os", "compiler", "build_type"
     generators = "cmake_paths", "cmake_find_package"
