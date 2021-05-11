@@ -12,10 +12,15 @@ endif()
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
 #set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 #set(CMAKE_VISIBILITY_INLINES_HIDDEN "YES")
-if(${BUILD_SHARED_LIBS})
+if("${BUILD_SHARED_LIBS}")
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     #set(CMAKE_CXX_VISIBILITY_PRESET "default")
     #set(CMAKE_VISIBILITY_INLINES_HIDDEN "NO")
+else()
+    if("${MINGW}")
+        set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ ${CMAKE_CXX_STANDARD_LIBRARIES}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
+    endif()
 endif()
 
 set(CMAKE_OBJECT_PATH_MAX 1000)
@@ -79,7 +84,7 @@ if(DEFINED CONAN_PROGRAM)
         message(FATAL_ERROR "Unsupported CMAKE_CXX_COMPILER_ID: '${CMAKE_CXX_COMPILER_ID}' and CMAKE_CONAN_SETTINGS_COMPILER_VERSION: '${CMAKE_CONAN_SETTINGS_COMPILER_VERSION}'")
     endif()
 
-    if(${BUILD_SHARED_LIBS})
+    if("${BUILD_SHARED_LIBS}")
         set(CONAN_OPTIONS_SHARED "True")
     else()
         set(CONAN_OPTIONS_SHARED "False")
@@ -131,10 +136,7 @@ add_executable("${PROJECT_NAME}-executable" "src/test/cpp/main.cpp")
 target_link_libraries("${PROJECT_NAME}-executable" PRIVATE
     "${PROJECT_NAME}-interface"
 )
-if(
-    "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows"
-    AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
-)
+if("${BUILD_SHARED_LIBS}" AND "${MINGW}")
     get_filename_component(CXX_COMPILER_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
     foreach(fileName
         "libstdc++-6.dll"
