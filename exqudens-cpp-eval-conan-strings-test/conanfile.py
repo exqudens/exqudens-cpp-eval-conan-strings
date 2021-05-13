@@ -11,7 +11,7 @@ class ConanConfiguration(ConanFile):
         "exqudens-cpp-eval-conan-strings-lib/" + get_version() + "@test-user/test-channel"
     ]
     settings = "arch", "os", "compiler", "build_type"
-    generators = "cmake_paths", "cmake_find_package"
+    generators = "cmake_paths"
 
     def imports(self):
         self.copy(pattern="*.dll", src="bin", dst="bin")

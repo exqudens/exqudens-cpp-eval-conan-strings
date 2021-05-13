@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../version.txt" RAW_VERSION)
 string(STRIP "${RAW_VERSION}" VERSION)
-project("exqudens-cpp-eval-conan-strings-test" VERSION ${VERSION})
+project("exqudens-cpp-eval-conan-strings-test" VERSION "${VERSION}")
 
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
@@ -113,7 +113,7 @@ if(DEFINED CONAN_PROGRAM)
                 "${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake"
                 "${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.txt"
                 "${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt"
-                "${CMAKE_CURRENT_BINARY_DIR}/Findexqudens-cpp-eval-conan-strings-lib.cmake"
+                #"${CMAKE_CURRENT_BINARY_DIR}/Findexqudens-cpp-eval-conan-strings-lib.cmake"
                 "${CMAKE_CURRENT_BINARY_DIR}/graph_info.json"
         COMMENT "execute: '${PROJECT_NAME}-conan-install-clean'"
         VERBATIM
@@ -160,13 +160,15 @@ add_custom_target("${PROJECT_NAME}"
     COMMAND "${CMAKE_COMMAND}"
             -E
             env
-            "PATH=\"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\""
+            "PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             "$<TARGET_FILE:${PROJECT_NAME}-executable>"
     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     COMMENT "execute: '${PROJECT_NAME}'"
+    VERBATIM
 )
 
 add_custom_target("${PROJECT_NAME}-cmake-clean"
     COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_CURRENT_BINARY_DIR}" --target clean
     COMMENT "execute: '${PROJECT_NAME}-cmake-clean'"
+    VERBATIM
 )

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../version.txt" RAW_VERSION)
 string(STRIP "${RAW_VERSION}" VERSION)
-project("exqudens-cpp-eval-conan-strings-lib" VERSION ${VERSION})
+project("exqudens-cpp-eval-conan-strings-lib" VERSION "${VERSION}")
 
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
@@ -110,6 +110,7 @@ if(DEFINED CONAN_PROGRAM)
                 ${CONAN_SETTINGS}
                 ${CONAN_OPTIONS}
         COMMENT "execute: '${PROJECT_NAME}-conan-export'"
+        VERBATIM
     )
 endif()
 
@@ -121,9 +122,14 @@ target_include_directories("${PROJECT_NAME}" PRIVATE
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/main/cpp>"
     "$<INSTALL_INTERFACE:include>"
 )
+set_property(TARGET "${PROJECT_NAME}" PROPERTY "VERSION" "${PROJECT_VERSION}")
+set_property(TARGET "${PROJECT_NAME}" PROPERTY "SOVERSION" "${PROJECT_VERSION_MAJOR}")
+set_property(TARGET "${PROJECT_NAME}" PROPERTY "INTERFACE_${PROJECT_NAME}_MAJOR_VERSION" "${PROJECT_VERSION_MAJOR}")
+set_property(TARGET "${PROJECT_NAME}" APPEND PROPERTY "COMPATIBLE_INTERFACE_STRING" "${PROJECT_NAME}_MAJOR_VERSION")
 
 install(
     TARGETS "${PROJECT_NAME}"
+    EXPORT "${PROJECT_NAME}-targets"
     INCLUDES DESTINATION "${CMAKE_INSTALL_PREFIX}/include"
     RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
     LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
@@ -136,19 +142,49 @@ install(
     FILES_MATCHING PATTERN "*.hpp"
 )
 
+install(
+    EXPORT "${PROJECT_NAME}-targets"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+    NAMESPACE "${PROJECT_NAME}::"
+    FILE "${PROJECT_NAME}-targets.cmake"
+)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+    VERSION "${PROJECT_VERSION}"
+    COMPATIBILITY "ExactVersion"
+)
+
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+)
+
 add_custom_target("${PROJECT_NAME}-cmake-install"
     COMMAND "${CMAKE_COMMAND}" --install "${CMAKE_CURRENT_BINARY_DIR}"
     COMMENT "execute: '${PROJECT_NAME}-cmake-install'"
+    VERBATIM
 )
 
 add_custom_target("${PROJECT_NAME}-cmake-install-clean"
     COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_INSTALL_PREFIX}"
     COMMENT "execute: '${PROJECT_NAME}-cmake-install-clean'"
+    VERBATIM
 )
 
 add_custom_target("${PROJECT_NAME}-cmake-clean"
     COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_CURRENT_BINARY_DIR}" --target clean
     COMMENT "execute: '${PROJECT_NAME}-cmake-clean'"
+    VERBATIM
 )
 
 add_dependencies("${PROJECT_NAME}-cmake-clean"   "${PROJECT_NAME}-cmake-install-clean")
