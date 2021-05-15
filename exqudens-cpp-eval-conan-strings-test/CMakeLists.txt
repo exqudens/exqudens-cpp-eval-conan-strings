@@ -6,7 +6,7 @@ project("exqudens-cpp-eval-conan-strings-test" VERSION "${VERSION}")
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
 if(${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH "..." FORCE)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/cmake-install" CACHE PATH "..." FORCE)
 endif()
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
@@ -50,7 +50,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_LIBRARY_OUTPUT_DIRECT
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
+if(NOT DEFINED "PROJECT_PATH_LIST")
+    set("PROJECT_PATH_LIST" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+endif()
+
 if(DEFINED CONAN_PROGRAM)
+    if(NOT DEFINED CONAN_INSTALLED)
+        set(CONAN_INSTALLED "${CMAKE_CURRENT_BINARY_DIR}/conan-installed")
+    endif()
+
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         set(CONAN_SETTINGS --settings "os=${CMAKE_SYSTEM_NAME}")
     elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
@@ -84,6 +92,12 @@ if(DEFINED CONAN_PROGRAM)
         message(FATAL_ERROR "Unsupported CMAKE_CXX_COMPILER_ID: '${CMAKE_CXX_COMPILER_ID}' and CMAKE_CONAN_SETTINGS_COMPILER_VERSION: '${CMAKE_CONAN_SETTINGS_COMPILER_VERSION}'")
     endif()
 
+    if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "build_type=Release")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_BUILD_TYPE: '${CMAKE_BUILD_TYPE}'")
+    endif()
+
     if("${BUILD_SHARED_LIBS}")
         set(CONAN_OPTIONS_SHARED "True")
     else()
@@ -92,35 +106,50 @@ if(DEFINED CONAN_PROGRAM)
 
     set(CONAN_OPTIONS --options "exqudens-cpp-eval-conan-strings-lib:shared=${CONAN_OPTIONS_SHARED}")
 
-    if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake")
+    if(NOT EXISTS "${CONAN_INSTALLED}")
         execute_process(
             COMMAND "${CONAN_PROGRAM}"
                     install
                     "${CMAKE_CURRENT_SOURCE_DIR}"
                     --install-folder
-                    "${CMAKE_CURRENT_BINARY_DIR}"
+                    "${CONAN_INSTALLED}"
                     ${CONAN_SETTINGS}
                     ${CONAN_OPTIONS}
             COMMAND_ERROR_IS_FATAL ANY
         )
     endif()
 
-    include("${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake")
+    file(
+        GLOB CONAN_INSTALLED_PACKAGES
+        LIST_DIRECTORIES "true"
+        RELATIVE "${CONAN_INSTALLED}"
+        "${CONAN_INSTALLED}/*"
+    )
+    foreach(package ${CONAN_INSTALLED_PACKAGES})
+        if(IS_DIRECTORY "${CONAN_INSTALLED}/${package}")
+            if(NOT DEFINED "CMAKE_PREFIX_PATH")
+                set("CMAKE_PREFIX_PATH" "${CONAN_INSTALLED}/${package}")
+            else()
+                set("CMAKE_PREFIX_PATH" "${CONAN_INSTALLED}/${package}" "${CMAKE_PREFIX_PATH}")
+            endif()
+            set("PROJECT_PATH_LIST" "${CONAN_INSTALLED}/${package}/bin" "${PROJECT_PATH_LIST}")
+        endif()
+    endforeach()
 
     add_custom_target("${PROJECT_NAME}-conan-install-clean"
-        COMMAND "${CMAKE_COMMAND}" -E rm -f
-                "${CMAKE_CURRENT_BINARY_DIR}/conan.lock"
-                "${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake"
-                "${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.txt"
-                "${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt"
-                #"${CMAKE_CURRENT_BINARY_DIR}/Findexqudens-cpp-eval-conan-strings-lib.cmake"
-                "${CMAKE_CURRENT_BINARY_DIR}/graph_info.json"
+        COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CONAN_INSTALLED}"
         COMMENT "execute: '${PROJECT_NAME}-conan-install-clean'"
         VERBATIM
     )
 endif()
 
-find_package("exqudens-cpp-eval-conan-strings-lib" 1.0.0 REQUIRED)
+cmake_path(
+    CONVERT "${PROJECT_PATH_LIST}"
+    TO_NATIVE_PATH_LIST PROJECT_NATIVE_PATH_LIST
+    NORMALIZE
+)
+
+find_package("exqudens-cpp-eval-conan-strings-lib" "1.0.0" REQUIRED)
 
 add_library("${PROJECT_NAME}-interface" INTERFACE
     "src/test/cpp/exqudens/evaluation/StringsTests.hpp"
@@ -160,7 +189,7 @@ add_custom_target("${PROJECT_NAME}"
     COMMAND "${CMAKE_COMMAND}"
             -E
             env
-            "PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            "PATH=${PROJECT_NATIVE_PATH_LIST}"
             "$<TARGET_FILE:${PROJECT_NAME}-executable>"
     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     COMMENT "execute: '${PROJECT_NAME}'"

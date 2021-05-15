@@ -6,7 +6,7 @@ project("exqudens-cpp-eval-conan-strings-lib" VERSION "${VERSION}")
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
 if(${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH "..." FORCE)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/cmake-install" CACHE PATH "..." FORCE)
 endif()
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
@@ -79,6 +79,12 @@ if(DEFINED CONAN_PROGRAM)
         message(FATAL_ERROR "Unsupported CMAKE_CXX_COMPILER_ID: '${CMAKE_CXX_COMPILER_ID}' and CMAKE_CONAN_SETTINGS_COMPILER_VERSION: '${CMAKE_CONAN_SETTINGS_COMPILER_VERSION}'")
     endif()
 
+    if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+        set(CONAN_SETTINGS ${CONAN_SETTINGS} --settings "build_type=Release")
+    else()
+        message(FATAL_ERROR "Unsupported CMAKE_BUILD_TYPE: '${CMAKE_BUILD_TYPE}'")
+    endif()
+
     if("${BUILD_SHARED_LIBS}")
         set(CONAN_OPTIONS_SHARED "True")
     else()
@@ -130,21 +136,21 @@ set_property(TARGET "${PROJECT_NAME}" APPEND PROPERTY "COMPATIBLE_INTERFACE_STRI
 install(
     TARGETS "${PROJECT_NAME}"
     EXPORT "${PROJECT_NAME}-targets"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_PREFIX}/include"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
+    INCLUDES DESTINATION "include"
+    RUNTIME DESTINATION "bin"
+    LIBRARY DESTINATION "lib"
+    ARCHIVE DESTINATION "lib"
 )
 
 install(
     DIRECTORY "src/main/cpp/"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/include"
+    DESTINATION "include"
     FILES_MATCHING PATTERN "*.hpp"
 )
 
 install(
     EXPORT "${PROJECT_NAME}-targets"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+    DESTINATION "cmake"
     NAMESPACE "${PROJECT_NAME}::"
     FILE "${PROJECT_NAME}-targets.cmake"
 )
@@ -154,7 +160,7 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
-    INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+    INSTALL_DESTINATION "cmake"
 )
 
 write_basic_package_version_file(
@@ -166,11 +172,11 @@ write_basic_package_version_file(
 install(
     FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+    DESTINATION "cmake"
 )
 
 add_custom_target("${PROJECT_NAME}-cmake-install"
-    COMMAND "${CMAKE_COMMAND}" --install "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMAND "${CMAKE_COMMAND}" --install "${CMAKE_CURRENT_BINARY_DIR}" --prefix "${CMAKE_INSTALL_PREFIX}"
     COMMENT "execute: '${PROJECT_NAME}-cmake-install'"
     VERBATIM
 )
