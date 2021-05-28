@@ -1,7 +1,7 @@
 #!/bin/bash
 
-SCRIPT_CMAKE_PROGRAM="${CMAKE_PROGRAM}"
-SCRIPT_CONAN_PROGRAM="${CONAN_PROGRAM}"
+SCRIPT_CMAKE_PROGRAM_PATH="${CMAKE_PROGRAM_PATH}"
+SCRIPT_CONAN_PROGRAM_PATH="${CONAN_PROGRAM_PATH}"
 
 SCRIPT_MSVC_RUNTIME_LIBRARY='MultiThreadedDLL'
 SCRIPT_BUILD_TYPE='Release'
@@ -24,11 +24,14 @@ else
   echo "Unsupported BUILD_SHARED_LIBS: '${2}'" && exit 1
 fi
 
-"${SCRIPT_CMAKE_PROGRAM}" -DBUILD_SHARED_LIBS:BOOL="${SCRIPT_BUILD_SHARED_LIBS}" -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING="${SCRIPT_MSVC_RUNTIME_LIBRARY}" -DCMAKE_BUILD_TYPE:STRING="${SCRIPT_BUILD_TYPE}" -DCONAN_PROGRAM:FILEPATH="${SCRIPT_CONAN_PROGRAM}" -G "${SCRIPT_GENERATOR}" -S "exqudens-cpp-eval-conan-strings-lib" -B "build/${1}-${2}/exqudens-cpp-eval-conan-strings-lib" &&\
-"${SCRIPT_CMAKE_PROGRAM}" --build "build/${1}-${2}/exqudens-cpp-eval-conan-strings-lib" --target "exqudens-cpp-eval-conan-strings-lib-cmake-install" &&\
-"${SCRIPT_CMAKE_PROGRAM}" --build "build/${1}-${2}/exqudens-cpp-eval-conan-strings-lib" --target "exqudens-cpp-eval-conan-strings-lib-conan-export-testing" &&\
-"${SCRIPT_CMAKE_PROGRAM}" -DBUILD_SHARED_LIBS:BOOL="${SCRIPT_BUILD_SHARED_LIBS}" -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING="${SCRIPT_MSVC_RUNTIME_LIBRARY}" -DCMAKE_BUILD_TYPE:STRING="${SCRIPT_BUILD_TYPE}" -DCONAN_PROGRAM:FILEPATH="${SCRIPT_CONAN_PROGRAM}" -G "${SCRIPT_GENERATOR}" -S "exqudens-cpp-eval-conan-strings-test" -B "build/${1}-${2}/exqudens-cpp-eval-conan-strings-test" &&\
-"${SCRIPT_CMAKE_PROGRAM}" --build "build/${1}-${2}/exqudens-cpp-eval-conan-strings-test" --target "exqudens-cpp-eval-conan-strings-test" &&\
-"${SCRIPT_CMAKE_PROGRAM}" --build "build/${1}-${2}/exqudens-cpp-eval-conan-strings-lib" --target "exqudens-cpp-eval-conan-strings-lib-conan-export" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" -DBUILD_SHARED_LIBS:BOOL="${SCRIPT_BUILD_SHARED_LIBS}" -DCMAKE_MSVC_RUNTIME_LIBRARY:STRING="${SCRIPT_MSVC_RUNTIME_LIBRARY}" -DCMAKE_BUILD_TYPE:STRING="${SCRIPT_BUILD_TYPE}" -DCONAN_PROGRAM_PATH:FILEPATH="${SCRIPT_CONAN_PROGRAM_PATH}" -G "${SCRIPT_GENERATOR}" -S "." -B "build/${1}-${2}" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" --build "build/${1}-${2}" --target "exqudens-cpp-eval-conan-strings-lib" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" --build "build/${1}-${2}" --target "exqudens-cpp-eval-conan-strings-test" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" --build "build/${1}-${2}" --target "exqudens-cpp-eval-conan-strings-lib-cmake-install" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" --build "build/${1}-${2}" --target "exqudens-cpp-eval-conan-strings-lib-conan-export-testing" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" --build "build/${1}-${2}" --target "exqudens-cpp-eval-conan-strings-package-test-conan-install" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" "build/${1}-${2}" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" --build "build/${1}-${2}" --target "exqudens-cpp-eval-conan-strings-package-test" &&\
+"${SCRIPT_CMAKE_PROGRAM_PATH}" --build "build/${1}-${2}" --target "exqudens-cpp-eval-conan-strings-lib-conan-export" &&\
 echo 'BUILD_SUCCESSFUL' ||\
 (echo 'BUILD_FAILED' && false)
