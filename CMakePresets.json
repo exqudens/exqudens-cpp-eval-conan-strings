@@ -1,0 +1,103 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20
+  },
+  "configurePresets": [
+    {
+      "name": "msvc-16-shared",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Visual Studio 16 2019",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" : {
+          "type": "STRING",
+          "value": "Release"
+        },
+        "CMAKE_MSVC_RUNTIME_LIBRARY": {
+          "type": "STRING",
+          "value": "MultiThreadedDLL"
+        },
+        "BUILD_SHARED_LIBS" : {
+          "type": "BOOL",
+          "value": true
+        }
+      }
+    },
+    {
+      "name": "msvc-16-static",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Visual Studio 16 2019",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" : {
+          "type": "STRING",
+          "value": "Release"
+        },
+        "CMAKE_MSVC_RUNTIME_LIBRARY": {
+          "type": "STRING",
+          "value": "MultiThreadedDLL"
+        },
+        "BUILD_SHARED_LIBS" : {
+          "type": "BOOL",
+          "value": false
+        }
+      }
+    },
+    {
+      "name": "gcc-10-shared",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "CodeBlocks - MinGW Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" : {
+          "type": "STRING",
+          "value": "Release"
+        },
+        "CMAKE_MSVC_RUNTIME_LIBRARY": {
+          "type": "STRING",
+          "value": "MultiThreadedDLL"
+        },
+        "BUILD_SHARED_LIBS" : {
+          "type": "BOOL",
+          "value": true
+        }
+      }
+    },
+    {
+      "name": "gcc-10-static",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "CodeBlocks - MinGW Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" : {
+          "type": "STRING",
+          "value": "Release"
+        },
+        "CMAKE_MSVC_RUNTIME_LIBRARY": {
+          "type": "STRING",
+          "value": "MultiThreadedDLL"
+        },
+        "BUILD_SHARED_LIBS" : {
+          "type": "BOOL",
+          "value": false
+        }
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "msvc-16-shared",
+      "configurePreset": "msvc-16-shared"
+    },
+    {
+      "name": "msvc-16-static",
+      "configurePreset": "msvc-16-static"
+    },
+    {
+      "name": "gcc-10-shared",
+      "configurePreset": "gcc-10-shared"
+    },
+    {
+      "name": "gcc-10-static",
+      "configurePreset": "gcc-10-static"
+    }
+  ]
+}

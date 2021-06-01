@@ -7,6 +7,25 @@ project("${NAME}" VERSION "${VERSION}")
 
 message("project: '${PROJECT_NAME}-${PROJECT_VERSION}'")
 
+if(NOT DEFINED "CONAN_COMMAND")
+    cmake_path(
+        CONVERT "$ENV{PATH}"
+        TO_CMAKE_PATH_LIST "${PROJECT_NAME}_CMAKE_PATH_LIST"
+        NORMALIZE
+    )
+    foreach(pathDir ${${PROJECT_NAME}_CMAKE_PATH_LIST})
+        file(GLOB pathDirFileNames RELATIVE "${pathDir}" "${pathDir}/*")
+        foreach(pathFileName ${pathDirFileNames})
+            if("conan" STREQUAL "${pathFileName}" OR "conan.exe" STREQUAL "${pathFileName}")
+                set(CONAN_COMMAND "${pathDir}/${pathFileName}" CACHE FILEPATH "..." FORCE)
+            endif()
+        endforeach()
+    endforeach()
+    if(NOT DEFINED "CONAN_COMMAND")
+        message(FATAL_ERROR "No 'conan' or 'conan.exe' in 'ENV{PATH}'")
+    endif()
+endif()
+
 if(NOT DEFINED "CMAKE_MSVC_RUNTIME_LIBRARY")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 endif()
@@ -45,5 +64,27 @@ add_subdirectory("${PROJECT_NAME}-lib")
 add_subdirectory("${PROJECT_NAME}-test")
 add_subdirectory("${PROJECT_NAME}-package-test")
 
-add_dependencies("${PROJECT_NAME}-lib-cmake-clean"   "${PROJECT_NAME}-lib-cmake-install-clean")
-add_dependencies("${PROJECT_NAME}-lib-cmake-install" "${PROJECT_NAME}-lib")
+#[[add_dependencies("${PROJECT_NAME}-test-lib" "${PROJECT_NAME}-lib")
+add_dependencies("${PROJECT_NAME}-test-executable" "${PROJECT_NAME}-test-lib")
+add_dependencies("${PROJECT_NAME}-test" "${PROJECT_NAME}-test-executable")
+add_dependencies("${PROJECT_NAME}-lib-cmake-install" "${PROJECT_NAME}-test")
+
+if(TARGET "${PROJECT_NAME}-lib-conan-export-testing")
+    add_dependencies("${PROJECT_NAME}-lib-conan-export-testing" "${PROJECT_NAME}-lib-cmake-install")
+endif()
+
+if(TARGET "${PROJECT_NAME}-package-test-conan-install" AND TARGET "${PROJECT_NAME}-lib-conan-export-testing")
+    add_dependencies("${PROJECT_NAME}-package-test-conan-install" "${PROJECT_NAME}-lib-conan-export-testing")
+endif()
+
+if(TARGET "${PROJECT_NAME}-package-test-executable" AND TARGET "${PROJECT_NAME}-package-test-conan-install")
+    add_dependencies("${PROJECT_NAME}-package-test-executable" "${PROJECT_NAME}-package-test-conan-install")
+endif()
+
+if(TARGET "${PROJECT_NAME}-package-test" AND TARGET "${PROJECT_NAME}-package-test-executable")
+    add_dependencies("${PROJECT_NAME}-package-test" "${PROJECT_NAME}-package-test-executable")
+endif()
+
+if(TARGET "${PROJECT_NAME}-lib-conan-export" AND TARGET "${PROJECT_NAME}-package-test")
+    add_dependencies("${PROJECT_NAME}-lib-conan-export" "${PROJECT_NAME}-package-test")
+endif()]]

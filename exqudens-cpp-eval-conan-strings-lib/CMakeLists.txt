@@ -23,7 +23,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECT
 
 set("${PROJECT_NAME}_CMAKE_INSTALL_PREFIX" "${PROJECT_BINARY_DIR}/cmake-install")
 
-if(DEFINED "CONAN_PROGRAM_PATH")
+if(DEFINED "CONAN_COMMAND")
     conan_settings(CONAN_SETTINGS
         "${CMAKE_SYSTEM_NAME}"
         "${CMAKE_SYSTEM_PROCESSOR}"
@@ -39,7 +39,7 @@ if(DEFINED "CONAN_PROGRAM_PATH")
     )
 
     add_custom_target_conan_export_user_channel("${PROJECT_NAME}-conan-export-testing"
-        "${CONAN_PROGRAM_PATH}"
+        "${CONAN_COMMAND}"
         "${PROJECT_SOURCE_DIR}/conanfile.py"
         "test-user"
         "test-channel"
@@ -48,12 +48,26 @@ if(DEFINED "CONAN_PROGRAM_PATH")
         "${CONAN_OPTIONS}"
     )
 
+    add_custom_target_conan_export_user_channel_clean("${PROJECT_NAME}-conan-export-testing-clean"
+        "${CONAN_COMMAND}"
+        "${PROJECT_NAME}"
+        "${PROJECT_NAME}"
+        "test-user"
+        "test-channel"
+    )
+
     add_custom_target_conan_export("${PROJECT_NAME}-conan-export"
-        "${CONAN_PROGRAM_PATH}"
+        "${CONAN_COMMAND}"
         "${PROJECT_SOURCE_DIR}/conanfile.py"
         "${${PROJECT_NAME}_CMAKE_INSTALL_PREFIX}"
         "${CONAN_SETTINGS}"
         "${CONAN_OPTIONS}"
+    )
+
+    add_custom_target_conan_export_clean("${PROJECT_NAME}-conan-export-clean"
+        "${CONAN_COMMAND}"
+        "${PROJECT_NAME}"
+        "${PROJECT_NAME}"
     )
 endif()
 

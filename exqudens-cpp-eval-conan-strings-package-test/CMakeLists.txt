@@ -24,7 +24,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECT
 set("${PROJECT_NAME}_CONAN_INSTALL_PREFIX" "${PROJECT_BINARY_DIR}/conan-install")
 set("${PROJECT_NAME}_CMAKE_PREFIX_PATH" "")
 
-if(DEFINED "CONAN_PROGRAM_PATH")
+if(DEFINED "CONAN_COMMAND")
     conan_settings(CONAN_SETTINGS
         "${CMAKE_SYSTEM_NAME}"
         "${CMAKE_SYSTEM_PROCESSOR}"
@@ -41,7 +41,7 @@ if(DEFINED "CONAN_PROGRAM_PATH")
     )
 
     add_custom_target_conan_install("${PROJECT_NAME}-conan-install"
-        "${CONAN_PROGRAM_PATH}"
+        "${CONAN_COMMAND}"
         "${PROJECT_SOURCE_DIR}/conanfile.py"
         "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}"
         "${CONAN_SETTINGS}"
@@ -71,16 +71,6 @@ if("" STREQUAL "${${PROJECT_NAME}_CMAKE_PREFIX_PATH}")
 endif()
 
 find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" REQUIRED PATHS ${${PROJECT_NAME}_CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
-
-#[[add_library("${PROJECT_NAME}-interface" INTERFACE
-    "src/test/cpp/exqudens/evaluation/StringsTests.hpp"
-)
-target_include_directories("${PROJECT_NAME}-interface" INTERFACE
-    "src/test/cpp"
-)
-target_link_libraries("${PROJECT_NAME}-interface" INTERFACE
-    "exqudens-cpp-eval-conan-strings-lib::exqudens-cpp-eval-conan-strings-lib"
-)]]
 
 add_executable("${PROJECT_NAME}-executable" "src/test/cpp/main.cpp")
 target_link_libraries("${PROJECT_NAME}-executable" PRIVATE

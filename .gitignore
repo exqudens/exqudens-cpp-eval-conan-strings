@@ -10,4 +10,5 @@ build/
 *.iws
 *.ipr
 *.ids
+CMakeUserPresets.json
 CMakeSettings.json
