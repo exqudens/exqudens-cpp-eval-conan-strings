@@ -25,7 +25,7 @@ set("${PROJECT_NAME}_CONAN_INSTALL_PREFIX" "${PROJECT_BINARY_DIR}/conan-install"
 set("${PROJECT_NAME}_CMAKE_PREFIX_PATH" "")
 
 if(DEFINED "CONAN_COMMAND")
-    conan_settings(CONAN_SETTINGS
+    set_conan_settings(CONAN_SETTINGS
         "${CMAKE_SYSTEM_NAME}"
         "${CMAKE_SYSTEM_PROCESSOR}"
         "${CMAKE_CXX_COMPILER_ID}"
@@ -35,9 +35,9 @@ if(DEFINED "CONAN_COMMAND")
         "${CMAKE_BUILD_TYPE}"
     )
 
-    conan_options(CONAN_OPTIONS
+    set_conan_options(CONAN_OPTIONS
         "${BUILD_SHARED_LIBS}"
-        "exqudens-cpp-eval-conan-strings-lib"
+        "${CMAKE_PROJECT_NAME}-lib"
     )
 
     add_custom_target_conan_install("${PROJECT_NAME}-conan-install"
@@ -72,10 +72,26 @@ endif()
 
 find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" REQUIRED PATHS ${${PROJECT_NAME}_CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 
+file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/generated")
+get_target_property("TEST_LIB_SOURCES" "${CMAKE_PROJECT_NAME}-test-lib" SOURCES)
+foreach(testLibSource ${TEST_LIB_SOURCES})
+    get_filename_component(testLibSourceDir "${testLibSource}" DIRECTORY)
+    file(COPY "${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-test/${testLibSource}" DESTINATION "${PROJECT_BINARY_DIR}/generated/${testLibSourceDir}")
+endforeach()
+add_library("${PROJECT_NAME}-lib" STATIC
+    "${PROJECT_BINARY_DIR}/generated/src/test/cpp/exqudens/evaluation/StringsTests.hpp"
+    "${PROJECT_BINARY_DIR}/generated/src/test/cpp/exqudens/evaluation/StringsTests.cpp"
+)
+target_include_directories("${PROJECT_NAME}-lib" PUBLIC
+    "${PROJECT_BINARY_DIR}/generated/src/test/cpp"
+)
+target_link_libraries("${PROJECT_NAME}-lib" PRIVATE
+    "${CMAKE_PROJECT_NAME}-lib::${CMAKE_PROJECT_NAME}-lib"
+)
+
 add_executable("${PROJECT_NAME}-executable" "src/test/cpp/main.cpp")
 target_link_libraries("${PROJECT_NAME}-executable" PRIVATE
-    "${CMAKE_PROJECT_NAME}-test-lib"
-    "exqudens-cpp-eval-conan-strings-lib::exqudens-cpp-eval-conan-strings-lib"
+    "${PROJECT_NAME}-lib"
 )
 if("${BUILD_SHARED_LIBS}")
     foreach(package ${${PROJECT_NAME}_CMAKE_PREFIX_PATH})

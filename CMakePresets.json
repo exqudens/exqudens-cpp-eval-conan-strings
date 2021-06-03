@@ -6,17 +6,21 @@
   },
   "configurePresets": [
     {
-      "name": "msvc-16-shared",
+      "name": "cmd-msvc-16-shared",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "Visual Studio 16 2019",
+      "toolset": {
+        "value": "host=x86",
+        "strategy": "set"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "set"
+      },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE" : {
           "type": "STRING",
           "value": "Release"
-        },
-        "CMAKE_MSVC_RUNTIME_LIBRARY": {
-          "type": "STRING",
-          "value": "MultiThreadedDLL"
         },
         "BUILD_SHARED_LIBS" : {
           "type": "BOOL",
@@ -25,17 +29,21 @@
       }
     },
     {
-      "name": "msvc-16-static",
+      "name": "cmd-msvc-16-static",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "Visual Studio 16 2019",
+      "toolset": {
+        "value": "host=x86",
+        "strategy": "set"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "set"
+      },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE" : {
           "type": "STRING",
           "value": "Release"
-        },
-        "CMAKE_MSVC_RUNTIME_LIBRARY": {
-          "type": "STRING",
-          "value": "MultiThreadedDLL"
         },
         "BUILD_SHARED_LIBS" : {
           "type": "BOOL",
@@ -44,17 +52,13 @@
       }
     },
     {
-      "name": "gcc-10-shared",
+      "name": "cmd-gcc-10-shared",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "CodeBlocks - MinGW Makefiles",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE" : {
           "type": "STRING",
           "value": "Release"
-        },
-        "CMAKE_MSVC_RUNTIME_LIBRARY": {
-          "type": "STRING",
-          "value": "MultiThreadedDLL"
         },
         "BUILD_SHARED_LIBS" : {
           "type": "BOOL",
@@ -63,17 +67,13 @@
       }
     },
     {
-      "name": "gcc-10-static",
+      "name": "cmd-gcc-10-static",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "CodeBlocks - MinGW Makefiles",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE" : {
           "type": "STRING",
           "value": "Release"
-        },
-        "CMAKE_MSVC_RUNTIME_LIBRARY": {
-          "type": "STRING",
-          "value": "MultiThreadedDLL"
         },
         "BUILD_SHARED_LIBS" : {
           "type": "BOOL",
@@ -84,20 +84,20 @@
   ],
   "buildPresets": [
     {
-      "name": "msvc-16-shared",
-      "configurePreset": "msvc-16-shared"
+      "name": "cmd-msvc-16-shared",
+      "configurePreset": "cmd-msvc-16-shared"
     },
     {
-      "name": "msvc-16-static",
-      "configurePreset": "msvc-16-static"
+      "name": "cmd-msvc-16-static",
+      "configurePreset": "cmd-msvc-16-static"
     },
     {
-      "name": "gcc-10-shared",
-      "configurePreset": "gcc-10-shared"
+      "name": "cmd-gcc-10-shared",
+      "configurePreset": "cmd-gcc-10-shared"
     },
     {
-      "name": "gcc-10-static",
-      "configurePreset": "gcc-10-static"
+      "name": "cmd-gcc-10-static",
+      "configurePreset": "cmd-gcc-10-static"
     }
   ]
 }

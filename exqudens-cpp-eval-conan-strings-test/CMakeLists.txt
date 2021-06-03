@@ -26,11 +26,10 @@ add_library("${PROJECT_NAME}-lib" STATIC
     "src/test/cpp/exqudens/evaluation/StringsTests.cpp"
 )
 target_include_directories("${PROJECT_NAME}-lib" PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/test/cpp>"
-    "$<INSTALL_INTERFACE:include>"
+    "src/test/cpp"
 )
 target_link_libraries("${PROJECT_NAME}-lib" PRIVATE
-    "exqudens-cpp-eval-conan-strings-lib"
+    "${CMAKE_PROJECT_NAME}-lib"
 )
 
 add_executable("${PROJECT_NAME}-executable" "src/test/cpp/main.cpp")

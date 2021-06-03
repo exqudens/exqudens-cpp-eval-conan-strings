@@ -24,7 +24,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECT
 set("${PROJECT_NAME}_CMAKE_INSTALL_PREFIX" "${PROJECT_BINARY_DIR}/cmake-install")
 
 if(DEFINED "CONAN_COMMAND")
-    conan_settings(CONAN_SETTINGS
+    set_conan_settings(CONAN_SETTINGS
         "${CMAKE_SYSTEM_NAME}"
         "${CMAKE_SYSTEM_PROCESSOR}"
         "${CMAKE_CXX_COMPILER_ID}"
@@ -34,7 +34,7 @@ if(DEFINED "CONAN_COMMAND")
         "${CMAKE_BUILD_TYPE}"
     )
 
-    conan_options(CONAN_OPTIONS
+    set_conan_options(CONAN_OPTIONS
         "${BUILD_SHARED_LIBS}"
     )
 
@@ -51,7 +51,7 @@ if(DEFINED "CONAN_COMMAND")
     add_custom_target_conan_export_user_channel_clean("${PROJECT_NAME}-conan-export-testing-clean"
         "${CONAN_COMMAND}"
         "${PROJECT_NAME}"
-        "${PROJECT_NAME}"
+        "${PROJECT_VERSION}"
         "test-user"
         "test-channel"
     )
@@ -67,7 +67,7 @@ if(DEFINED "CONAN_COMMAND")
     add_custom_target_conan_export_clean("${PROJECT_NAME}-conan-export-clean"
         "${CONAN_COMMAND}"
         "${PROJECT_NAME}"
-        "${PROJECT_NAME}"
+        "${PROJECT_VERSION}"
     )
 endif()
 
