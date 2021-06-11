@@ -84,8 +84,14 @@ function(
         endif()
 
         # compiler.runtime
-        if("${msvcRuntimeLibrary}" STREQUAL "MultiThreadedDLL")
+        if("${msvcRuntimeLibrary}" STREQUAL "MultiThreaded")
+            set(value "${value}" "--settings" "compiler.runtime=MT")
+        elseif("${msvcRuntimeLibrary}" STREQUAL "MultiThreadedDLL")
             set(value "${value}" "--settings" "compiler.runtime=MD")
+        elseif("${msvcRuntimeLibrary}" STREQUAL "MultiThreadedDebug")
+            set(value "${value}" "--settings" "compiler.runtime=MTd")
+        elseif("${msvcRuntimeLibrary}" STREQUAL "MultiThreadedDebugDLL")
+            set(value "${value}" "--settings" "compiler.runtime=MDd")
         else()
             message(FATAL_ERROR "Unsupported msvcRuntimeLibrary: '${msvcRuntimeLibrary}'")
         endif()
@@ -93,7 +99,11 @@ function(
         set(value "${value}" "--settings" "compiler=gcc")
 
         # compiler.version
-        if("${cxxCompilerVersion}" VERSION_GREATER_EQUAL "10")
+        if("${cxxCompilerVersion}" VERSION_GREATER_EQUAL "8" AND "${cxxCompilerVersion}" VERSION_LESS "9")
+            set(value "${value}" "--settings" "compiler.version=9")
+        elseif("${cxxCompilerVersion}" VERSION_GREATER_EQUAL "9" AND "${cxxCompilerVersion}" VERSION_LESS "10")
+            set(value "${value}" "--settings" "compiler.version=9")
+        elseif("${cxxCompilerVersion}" VERSION_GREATER_EQUAL "10" AND "${cxxCompilerVersion}" VERSION_LESS "11")
             set(value "${value}" "--settings" "compiler.version=10")
         else()
             message(FATAL_ERROR "Unsupported cxxCompilerVersion: '${cxxCompilerVersion}'")
