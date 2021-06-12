@@ -16,9 +16,7 @@ class ConanConfiguration(ConanFile):
     ]
     settings = "arch", "os", "compiler", "build_type"
     options = {"shared": [True, False]}
-
-    def imports(self):
-        self.copy(pattern="*", folder=True)
+    generators = "deploy"
 
 
 if __name__ == "__main__":
