@@ -16,7 +16,7 @@ class ConanConfiguration(ConanFile):
     ]
     settings = "arch", "os", "compiler", "build_type"
     options = {"shared": [True, False]}
-    generators = "deploy"
+    generators = "cmake_paths", "cmake_find_package"
 
 
 if __name__ == "__main__":

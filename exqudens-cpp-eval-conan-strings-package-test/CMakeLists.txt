@@ -48,12 +48,7 @@ if(DEFINED "CONAN_COMMAND")
         "${CONAN_OPTIONS}"
     )
 
-    add_custom_target_conan_install_clean("${PROJECT_NAME}-conan-install-clean"
-        "${CMAKE_COMMAND}"
-        "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}"
-    )
-
-    file(
+    #[[file(
         GLOB "${PROJECT_NAME}_CONAN_PACKAGES"
         LIST_DIRECTORIES "true"
         "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/*"
@@ -62,7 +57,19 @@ if(DEFINED "CONAN_COMMAND")
         if(IS_DIRECTORY "${package}")
             list(PREPEND "${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${package}")
         endif()
-    endforeach()
+    endforeach()]]
+
+    if(EXISTS "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/conan_paths.cmake")
+        set(CMAKE_PREFIX_PATH "")
+        include("${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/conan_paths.cmake")
+        list(REMOVE_ITEM "CMAKE_PREFIX_PATH" "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}")
+        foreach(package ${CMAKE_PREFIX_PATH})
+            if(IS_DIRECTORY "${package}")
+                list(PREPEND "${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${package}")
+            endif()
+        endforeach()
+        set(CMAKE_PREFIX_PATH "")
+    endif()
 endif()
 
 if("" STREQUAL "${${PROJECT_NAME}_CMAKE_PREFIX_PATH}")
@@ -70,7 +77,7 @@ if("" STREQUAL "${${PROJECT_NAME}_CMAKE_PREFIX_PATH}")
     return()
 endif()
 
-find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" REQUIRED PATHS ${${PROJECT_NAME}_CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
+find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" REQUIRED CONFIG PATHS ${${PROJECT_NAME}_CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 
 file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/generated")
 get_target_property("TEST_LIB_SOURCES" "${CMAKE_PROJECT_NAME}-test-lib" SOURCES)
@@ -144,11 +151,5 @@ add_custom_target("${PROJECT_NAME}"
             "$<TARGET_FILE:${PROJECT_NAME}-executable>"
     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     COMMENT "custom-target: '${PROJECT_NAME}'"
-    VERBATIM
-)
-
-add_custom_target("${PROJECT_NAME}-cmake-clean"
-    COMMAND "${CMAKE_COMMAND}" --build "${PROJECT_BINARY_DIR}" --target clean
-    COMMENT "custom-target: '${PROJECT_NAME}-cmake-clean'"
     VERBATIM
 )

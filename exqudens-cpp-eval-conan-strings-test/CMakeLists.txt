@@ -74,9 +74,3 @@ add_custom_target("${PROJECT_NAME}"
     COMMENT "custom-target: '${PROJECT_NAME}'"
     VERBATIM
 )
-
-add_custom_target("${PROJECT_NAME}-cmake-clean"
-    COMMAND "${CMAKE_COMMAND}" --build "${PROJECT_BINARY_DIR}" --target clean
-    COMMENT "custom-target: '${PROJECT_NAME}-cmake-clean'"
-    VERBATIM
-)

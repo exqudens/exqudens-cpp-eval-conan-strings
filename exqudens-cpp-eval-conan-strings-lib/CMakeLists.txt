@@ -63,12 +63,6 @@ if(DEFINED "CONAN_COMMAND")
         "${CONAN_SETTINGS}"
         "${CONAN_OPTIONS}"
     )
-
-    add_custom_target_conan_export_clean("${PROJECT_NAME}-conan-export-clean"
-        "${CONAN_COMMAND}"
-        "${PROJECT_NAME}"
-        "${PROJECT_VERSION}"
-    )
 endif()
 
 add_library("${PROJECT_NAME}"
@@ -129,17 +123,5 @@ install(
 add_custom_target("${PROJECT_NAME}-cmake-install"
     COMMAND "${CMAKE_COMMAND}" --install "${PROJECT_BINARY_DIR}" --prefix "${${PROJECT_NAME}_CMAKE_INSTALL_PREFIX}"
     COMMENT "custom-target: '${PROJECT_NAME}-cmake-install'"
-    VERBATIM
-)
-
-add_custom_target("${PROJECT_NAME}-cmake-install-clean"
-    COMMAND "${CMAKE_COMMAND}" -E rm -rf "${${PROJECT_NAME}_CMAKE_INSTALL_PREFIX}"
-    COMMENT "custom-target: '${PROJECT_NAME}-cmake-install-clean'"
-    VERBATIM
-)
-
-add_custom_target("${PROJECT_NAME}-cmake-clean"
-    COMMAND "${CMAKE_COMMAND}" --build "${PROJECT_BINARY_DIR}" --target clean
-    COMMENT "custom-target: '${PROJECT_NAME}-cmake-clean'"
     VERBATIM
 )
