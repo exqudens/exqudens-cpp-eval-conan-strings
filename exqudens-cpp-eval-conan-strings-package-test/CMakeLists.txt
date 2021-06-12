@@ -84,15 +84,15 @@ get_target_property("TEST_LIB_SOURCES" "${CMAKE_PROJECT_NAME}-test-lib" SOURCES)
 foreach(testLibSource ${TEST_LIB_SOURCES})
     get_filename_component(testLibSourceDir "${testLibSource}" DIRECTORY)
     file(COPY "${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-test/${testLibSource}" DESTINATION "${PROJECT_BINARY_DIR}/generated/${testLibSourceDir}")
+    list(APPEND "PACKAGE_TEST_LIB_SOURCES" "${PROJECT_BINARY_DIR}/generated/${testLibSource}")
 endforeach()
 add_library("${PROJECT_NAME}-lib" STATIC
-    "${PROJECT_BINARY_DIR}/generated/src/test/cpp/exqudens/evaluation/StringsTests.hpp"
-    "${PROJECT_BINARY_DIR}/generated/src/test/cpp/exqudens/evaluation/StringsTests.cpp"
+    ${PACKAGE_TEST_LIB_SOURCES}
 )
 target_include_directories("${PROJECT_NAME}-lib" PUBLIC
     "${PROJECT_BINARY_DIR}/generated/src/test/cpp"
 )
-target_link_libraries("${PROJECT_NAME}-lib" PRIVATE
+target_link_libraries("${PROJECT_NAME}-lib" PUBLIC
     "${CMAKE_PROJECT_NAME}-lib::${CMAKE_PROJECT_NAME}-lib"
 )
 
