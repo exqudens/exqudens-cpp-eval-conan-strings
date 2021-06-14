@@ -22,9 +22,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_LIBRARY_OUTPUT_DIRECT
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 set("${PROJECT_NAME}_CONAN_INSTALL_PREFIX" "${PROJECT_BINARY_DIR}/conan-install")
+set("${PROJECT_NAME}_CMAKE_MODULE_PATH" "")
 set("${PROJECT_NAME}_CMAKE_PREFIX_PATH" "")
 
 if(DEFINED "CONAN_COMMAND")
+    set(CONAN_PACKAGE_NAMES
+        "${CMAKE_PROJECT_NAME}-lib"
+    )
+
     set_conan_settings(CONAN_SETTINGS
         "${CMAKE_SYSTEM_NAME}"
         "${CMAKE_SYSTEM_PROCESSOR}"
@@ -37,7 +42,7 @@ if(DEFINED "CONAN_COMMAND")
 
     set_conan_options(CONAN_OPTIONS
         "${BUILD_SHARED_LIBS}"
-        "${CMAKE_PROJECT_NAME}-lib"
+        ${CONAN_PACKAGE_NAMES}
     )
 
     add_custom_target_conan_install("${PROJECT_NAME}-conan-install"
@@ -48,36 +53,50 @@ if(DEFINED "CONAN_COMMAND")
         "${CONAN_OPTIONS}"
     )
 
-    #[[file(
-        GLOB "${PROJECT_NAME}_CONAN_PACKAGES"
-        LIST_DIRECTORIES "true"
-        "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/*"
-    )
-    foreach(package ${${PROJECT_NAME}_CONAN_PACKAGES})
-        if(IS_DIRECTORY "${package}")
-            list(PREPEND "${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${package}")
-        endif()
-    endforeach()]]
-
     if(EXISTS "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/conan_paths.cmake")
+        set("${PROJECT_NAME}_CMAKE_MODULE_PATH" "${CMAKE_MODULE_PATH}")
+        set("${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${CMAKE_PREFIX_PATH}")
+        set(CMAKE_MODULE_PATH "")
         set(CMAKE_PREFIX_PATH "")
         include("${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/conan_paths.cmake")
-        list(REMOVE_ITEM "CMAKE_PREFIX_PATH" "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}")
-        foreach(package ${CMAKE_PREFIX_PATH})
-            if(IS_DIRECTORY "${package}")
-                list(PREPEND "${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${package}")
+        set(CMAKE_MODULE_PATH "${${PROJECT_NAME}_CMAKE_MODULE_PATH}")
+        set(CMAKE_PREFIX_PATH "${${PROJECT_NAME}_CMAKE_PREFIX_PATH}")
+        foreach(packageName ${CONAN_PACKAGE_NAMES})
+            string(TOUPPER "${packageName}" packageNameUpper)
+            if(DEFINED "CONAN_${packageNameUpper}_ROOT" AND IS_DIRECTORY "${CONAN_${packageNameUpper}_ROOT}")
+                list(APPEND "${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${CONAN_${packageNameUpper}_ROOT}")
+                if(${BUILD_SHARED_LIBS} AND IS_DIRECTORY "${CONAN_${packageNameUpper}_ROOT}/bin")
+                    file(
+                        GLOB "packageBinFileNames"
+                        RELATIVE "${CONAN_${packageNameUpper}_ROOT}/bin"
+                        "${CONAN_${packageNameUpper}_ROOT}/bin/*"
+                    )
+                    foreach(packageBinFileName ${packageBinFileNames})
+                        if(NOT EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${packageBinFileName}")
+                            file(
+                                COPY "${CONAN_${packageNameUpper}_ROOT}/bin/${packageBinFileName}"
+                                DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+                            )
+                        endif()
+                    endforeach()
+                endif()
             endif()
         endforeach()
-        set(CMAKE_PREFIX_PATH "")
     endif()
 endif()
 
-if("" STREQUAL "${${PROJECT_NAME}_CMAKE_PREFIX_PATH}")
-    message(WARNING "${PROJECT_NAME}_CMAKE_PREFIX_PATH is empty")
+find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" QUIET CONFIG PATHS ${${PROJECT_NAME}_CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
+
+set_not_found_package_names(NOT_FOUND_PACKAGE_NAMES
+    "${CMAKE_PROJECT_NAME}-lib"
+)
+
+if(NOT "" STREQUAL "${NOT_FOUND_PACKAGE_NAMES}")
+    foreach(package ${NOT_FOUND_PACKAGE_NAMES})
+        message(WARNING "${package}_FOUND: '${${package}_FOUND}'")
+    endforeach()
     return()
 endif()
-
-find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" REQUIRED CONFIG PATHS ${${PROJECT_NAME}_CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 
 file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/generated")
 get_target_property("TEST_LIB_SOURCES" "${CMAKE_PROJECT_NAME}-test-lib" SOURCES)
@@ -100,47 +119,25 @@ add_executable("${PROJECT_NAME}-executable" "src/test/cpp/main.cpp")
 target_link_libraries("${PROJECT_NAME}-executable" PRIVATE
     "${PROJECT_NAME}-lib"
 )
-if("${BUILD_SHARED_LIBS}")
-    foreach(package ${${PROJECT_NAME}_CMAKE_PREFIX_PATH})
-        if(IS_DIRECTORY "${package}" AND IS_DIRECTORY "${package}/bin")
-            file(
-                GLOB FILE_NAMES
-                RELATIVE "${package}/bin"
-                "${package}/bin/*"
+if("${BUILD_SHARED_LIBS}" AND "${MINGW}")
+    get_filename_component(CXX_COMPILER_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
+    foreach(fileName
+        "libstdc++-6.dll"
+        "libgcc_s_seh-1.dll"
+        "libwinpthread-1.dll"
+        )
+        if(EXISTS ${CXX_COMPILER_DIR}/${fileName})
+            add_custom_command(
+                TARGET "${PROJECT_NAME}-executable"
+                PRE_BUILD
+                COMMAND ${CMAKE_COMMAND}
+                ARGS -E copy "${CXX_COMPILER_DIR}/${fileName}" "$<TARGET_FILE_DIR:${PROJECT_NAME}-executable>"
+                BYPRODUCTS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${fileName}
+                #COMMENT "custom-command-copy: '${CXX_COMPILER_DIR}/${fileName}' to '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}'"
+                VERBATIM
             )
-            foreach(fileName ${FILE_NAMES})
-                add_custom_command(
-                    TARGET "${PROJECT_NAME}-executable"
-                    PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND}
-                    ARGS -E copy "${package}/bin/${fileName}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-                    BYPRODUCTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${fileName}"
-                    #COMMENT "custom-command-copy: '${package}/bin/${fileName}' to '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}'"
-                    VERBATIM
-                )
-            endforeach()
         endif()
     endforeach()
-    if("${MINGW}")
-        get_filename_component(CXX_COMPILER_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
-        foreach(fileName
-            "libstdc++-6.dll"
-            "libgcc_s_seh-1.dll"
-            "libwinpthread-1.dll"
-            )
-            if(EXISTS ${CXX_COMPILER_DIR}/${fileName})
-                add_custom_command(
-                    TARGET "${PROJECT_NAME}-executable"
-                    PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND}
-                    ARGS -E copy "${CXX_COMPILER_DIR}/${fileName}" "$<TARGET_FILE_DIR:${PROJECT_NAME}-executable>"
-                    BYPRODUCTS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${fileName}
-                    #COMMENT "custom-command-copy: '${CXX_COMPILER_DIR}/${fileName}' to '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}'"
-                    VERBATIM
-                )
-            endif()
-        endforeach()
-    endif()
 endif()
 
 add_custom_target("${PROJECT_NAME}"

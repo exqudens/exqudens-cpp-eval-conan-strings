@@ -50,6 +50,7 @@ if("${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT}")
     set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/cmake-install" CACHE PATH "..." FORCE)
 endif()
 
+include("util.cmake")
 include("conan.cmake")
 
 if(NOT DEFINED "CONAN_PROGRAM_PATH" AND NOT DEFINED "CONAN_COMMAND")
