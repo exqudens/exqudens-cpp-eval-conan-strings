@@ -63,28 +63,3 @@ endif()
 add_subdirectory("${PROJECT_NAME}-lib")
 add_subdirectory("${PROJECT_NAME}-test")
 add_subdirectory("${PROJECT_NAME}-package-test")
-
-#[[add_dependencies("${PROJECT_NAME}-test-lib" "${PROJECT_NAME}-lib")
-add_dependencies("${PROJECT_NAME}-test-executable" "${PROJECT_NAME}-test-lib")
-add_dependencies("${PROJECT_NAME}-test" "${PROJECT_NAME}-test-executable")
-add_dependencies("${PROJECT_NAME}-lib-cmake-install" "${PROJECT_NAME}-test")
-
-if(TARGET "${PROJECT_NAME}-lib-conan-export-testing")
-    add_dependencies("${PROJECT_NAME}-lib-conan-export-testing" "${PROJECT_NAME}-lib-cmake-install")
-endif()
-
-if(TARGET "${PROJECT_NAME}-package-test-conan-install" AND TARGET "${PROJECT_NAME}-lib-conan-export-testing")
-    add_dependencies("${PROJECT_NAME}-package-test-conan-install" "${PROJECT_NAME}-lib-conan-export-testing")
-endif()
-
-if(TARGET "${PROJECT_NAME}-package-test-executable" AND TARGET "${PROJECT_NAME}-package-test-conan-install")
-    add_dependencies("${PROJECT_NAME}-package-test-executable" "${PROJECT_NAME}-package-test-conan-install")
-endif()
-
-if(TARGET "${PROJECT_NAME}-package-test" AND TARGET "${PROJECT_NAME}-package-test-executable")
-    add_dependencies("${PROJECT_NAME}-package-test" "${PROJECT_NAME}-package-test-executable")
-endif()
-
-if(TARGET "${PROJECT_NAME}-lib-conan-export" AND TARGET "${PROJECT_NAME}-package-test")
-    add_dependencies("${PROJECT_NAME}-lib-conan-export" "${PROJECT_NAME}-package-test")
-endif()]]
