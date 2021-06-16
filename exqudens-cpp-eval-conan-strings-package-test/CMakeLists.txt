@@ -71,7 +71,7 @@ endif()
 find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" QUIET CONFIG)
 
 set_not_found_package_names(NOT_FOUND_PACKAGE_NAMES
-    "${CMAKE_PROJECT_NAME}-lib"
+    ${CONAN_PACKAGE_NAMES}
 )
 
 if(NOT "" STREQUAL "${NOT_FOUND_PACKAGE_NAMES}")
