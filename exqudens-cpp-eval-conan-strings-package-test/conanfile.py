@@ -18,6 +18,10 @@ class ConanConfiguration(ConanFile):
     options = {"shared": [True, False]}
     generators = "cmake_paths", "cmake_find_package"
 
+    def imports(self):
+        self.copy(pattern="*.dll", dst="bin", src="bin")
+        self.copy(pattern="*.dylib", dst="lib", src="lib")
+
 
 if __name__ == "__main__":
     pass

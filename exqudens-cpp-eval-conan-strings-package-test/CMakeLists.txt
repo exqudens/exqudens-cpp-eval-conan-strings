@@ -21,9 +21,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_LIBRARY_OUTPUT_DIRECT
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
-set("${PROJECT_NAME}_CONAN_INSTALL_PREFIX" "${PROJECT_BINARY_DIR}/conan-install")
-set("${PROJECT_NAME}_CMAKE_MODULE_PATH" "")
-set("${PROJECT_NAME}_CMAKE_PREFIX_PATH" "")
+set(CMAKE_MODULE_PATH "")
+set(CMAKE_PREFIX_PATH "")
+set(CONAN_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/conan-install")
 
 if(DEFINED "CONAN_COMMAND")
     set(CONAN_PACKAGE_NAMES
@@ -48,44 +48,27 @@ if(DEFINED "CONAN_COMMAND")
     add_custom_target_conan_install("${PROJECT_NAME}-conan-install"
         "${CONAN_COMMAND}"
         "${PROJECT_SOURCE_DIR}/conanfile.py"
-        "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}"
+        "${CONAN_INSTALL_PREFIX}"
         "${CONAN_SETTINGS}"
         "${CONAN_OPTIONS}"
     )
 
-    if(EXISTS "${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/conan_paths.cmake")
-        set("${PROJECT_NAME}_CMAKE_MODULE_PATH" "${CMAKE_MODULE_PATH}")
-        set("${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${CMAKE_PREFIX_PATH}")
+    if(EXISTS "${CONAN_INSTALL_PREFIX}/conan_paths.cmake")
         set(CMAKE_MODULE_PATH "")
         set(CMAKE_PREFIX_PATH "")
-        include("${${PROJECT_NAME}_CONAN_INSTALL_PREFIX}/conan_paths.cmake")
-        set(CMAKE_MODULE_PATH "${${PROJECT_NAME}_CMAKE_MODULE_PATH}")
-        set(CMAKE_PREFIX_PATH "${${PROJECT_NAME}_CMAKE_PREFIX_PATH}")
+        include("${CONAN_INSTALL_PREFIX}/conan_paths.cmake")
+        set(CMAKE_MODULE_PATH "")
+        set(CMAKE_PREFIX_PATH "")
         foreach(packageName ${CONAN_PACKAGE_NAMES})
             string(TOUPPER "${packageName}" packageNameUpper)
             if(DEFINED "CONAN_${packageNameUpper}_ROOT" AND IS_DIRECTORY "${CONAN_${packageNameUpper}_ROOT}")
-                list(APPEND "${PROJECT_NAME}_CMAKE_PREFIX_PATH" "${CONAN_${packageNameUpper}_ROOT}")
-                if(${BUILD_SHARED_LIBS} AND IS_DIRECTORY "${CONAN_${packageNameUpper}_ROOT}/bin")
-                    file(
-                        GLOB "packageBinFileNames"
-                        RELATIVE "${CONAN_${packageNameUpper}_ROOT}/bin"
-                        "${CONAN_${packageNameUpper}_ROOT}/bin/*"
-                    )
-                    foreach(packageBinFileName ${packageBinFileNames})
-                        if(NOT EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${packageBinFileName}")
-                            file(
-                                COPY "${CONAN_${packageNameUpper}_ROOT}/bin/${packageBinFileName}"
-                                DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-                            )
-                        endif()
-                    endforeach()
-                endif()
+                list(APPEND CMAKE_PREFIX_PATH "${CONAN_${packageNameUpper}_ROOT}")
             endif()
         endforeach()
     endif()
 endif()
 
-find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" QUIET CONFIG PATHS ${${PROJECT_NAME}_CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
+find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" QUIET CONFIG)
 
 set_not_found_package_names(NOT_FOUND_PACKAGE_NAMES
     "${CMAKE_PROJECT_NAME}-lib"
@@ -140,11 +123,17 @@ if("${BUILD_SHARED_LIBS}" AND "${MINGW}")
     endforeach()
 endif()
 
+list(PREPEND PROJECT_PATH_LIST "${CONAN_INSTALL_PREFIX}/bin")
+cmake_path(
+    CONVERT "${PROJECT_PATH_LIST}"
+    TO_NATIVE_PATH_LIST PROJECT_NATIVE_PATH_LIST
+    NORMALIZE
+)
 add_custom_target("${PROJECT_NAME}"
     COMMAND "${CMAKE_COMMAND}"
             -E
             env
-            "PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            "PATH=${PROJECT_NATIVE_PATH_LIST}"
             "$<TARGET_FILE:${PROJECT_NAME}-executable>"
     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     COMMENT "custom-target: '${PROJECT_NAME}'"
