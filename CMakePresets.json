@@ -42,7 +42,7 @@
       }
     },
     {
-      "name": "windows-ninja-msvc-host-x64-target-x64",
+      "name": "windows-ninja-msvc",
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
@@ -73,7 +73,7 @@
       }
     },
     {
-      "name": "windows-ninja-gcc-host-x64-target-x64",
+      "name": "windows-ninja-gcc",
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
@@ -162,6 +162,26 @@
       "name": "ide-vs-host-x64-target-x64-release-static",
       "inherits": [ "vs-host-x64-target-x64", "release-static" ],
       "binaryDir": "${sourceDir}/vs-build/3"
+    },
+    {
+      "name": "cmd-windows-ninja-msvc-release-shared",
+      "inherits": [ "windows-ninja-msvc", "release-shared" ],
+      "binaryDir": "${sourceDir}/build/0"
+    },
+    {
+      "name": "cmd-windows-ninja-msvc-release-static",
+      "inherits": [ "windows-ninja-msvc", "release-static" ],
+      "binaryDir": "${sourceDir}/build/1"
+    },
+    {
+      "name": "cmd-windows-ninja-gcc-release-shared",
+      "inherits": [ "windows-ninja-gcc", "release-shared" ],
+      "binaryDir": "${sourceDir}/build/2"
+    },
+    {
+      "name": "cmd-windows-ninja-gcc-release-static",
+      "inherits": [ "windows-ninja-gcc", "release-static" ],
+      "binaryDir": "${sourceDir}/build/3"
     }
   ],
   "buildPresets": [
@@ -180,6 +200,22 @@
     {
       "name": "ide-vs-host-x64-target-x64-release-static",
       "configurePreset": "ide-vs-host-x64-target-x64-release-static"
+    },
+    {
+      "name": "cmd-windows-ninja-msvc-release-shared",
+      "configurePreset": "cmd-windows-ninja-msvc-release-shared"
+    },
+    {
+      "name": "cmd-windows-ninja-msvc-release-static",
+      "configurePreset": "cmd-windows-ninja-msvc-release-static"
+    },
+    {
+      "name": "cmd-windows-ninja-gcc-release-shared",
+      "configurePreset": "cmd-windows-ninja-gcc-release-shared"
+    },
+    {
+      "name": "cmd-windows-ninja-gcc-release-static",
+      "configurePreset": "cmd-windows-ninja-gcc-release-static"
     }
   ]
 }
