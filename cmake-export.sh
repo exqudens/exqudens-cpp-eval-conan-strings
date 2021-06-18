@@ -6,7 +6,7 @@ cmake --build --preset "${1}" --target "exqudens-cpp-eval-conan-strings-test" &&
 cmake --build --preset "${1}" --target "exqudens-cpp-eval-conan-strings-lib-cmake-install" &&\
 cmake --build --preset "${1}" --target "exqudens-cpp-eval-conan-strings-lib-conan-export-testing" &&\
 cmake --build --preset "${1}" --target "exqudens-cpp-eval-conan-strings-package-test-conan-install" &&\
-cmake -S "." --preset "${1}" --target "rebuild_cache" &&\
+cmake --build --preset "${1}" --target "rebuild_cache" &&\
 cmake --build --preset "${1}" --target "exqudens-cpp-eval-conan-strings-package-test" &&\
 cmake --build --preset "${1}" --target "exqudens-cpp-eval-conan-strings-lib-conan-export-testing-clean" &&\
 cmake --build --preset "${1}" --target "exqudens-cpp-eval-conan-strings-lib-conan-export" &&\
