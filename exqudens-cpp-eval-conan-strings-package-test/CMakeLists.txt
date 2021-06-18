@@ -62,7 +62,11 @@ if(DEFINED "CONAN_COMMAND")
         foreach(packageName ${CONAN_PACKAGE_NAMES})
             string(TOUPPER "${packageName}" packageNameUpper)
             if(DEFINED "CONAN_${packageNameUpper}_ROOT" AND IS_DIRECTORY "${CONAN_${packageNameUpper}_ROOT}")
-                list(APPEND CMAKE_PREFIX_PATH "${CONAN_${packageNameUpper}_ROOT}")
+                if("" STREQUAL "${CMAKE_PREFIX_PATH}")
+                    set(CMAKE_PREFIX_PATH "${CONAN_${packageNameUpper}_ROOT}")
+                else()
+                    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${CONAN_${packageNameUpper}_ROOT}")
+                endif()
             endif()
         endforeach()
     endif()
@@ -82,12 +86,21 @@ if(NOT "" STREQUAL "${NOT_FOUND_PACKAGE_NAMES}")
 endif()
 
 file(REMOVE_RECURSE "${PROJECT_BINARY_DIR}/generated")
-get_target_property("TEST_LIB_SOURCES" "${CMAKE_PROJECT_NAME}-test-lib" SOURCES)
+get_target_property(TEST_LIB_SOURCES "${CMAKE_PROJECT_NAME}-test-lib" SOURCES)
 foreach(testLibSource ${TEST_LIB_SOURCES})
     get_filename_component(testLibSourceDir "${testLibSource}" DIRECTORY)
     file(COPY "${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-test/${testLibSource}" DESTINATION "${PROJECT_BINARY_DIR}/generated/${testLibSourceDir}")
-    list(APPEND "PACKAGE_TEST_LIB_SOURCES" "${PROJECT_BINARY_DIR}/generated/${testLibSource}")
+    if("" STREQUAL "${PACKAGE_TEST_LIB_SOURCES}")
+        set(PACKAGE_TEST_LIB_SOURCES "${PROJECT_BINARY_DIR}/generated/${testLibSource}")
+    else()
+        set(PACKAGE_TEST_LIB_SOURCES "${PACKAGE_TEST_LIB_SOURCES}" "${PROJECT_BINARY_DIR}/generated/${testLibSource}")
+    endif()
 endforeach()
+get_target_property(TEST_EXECUTABLE_SOURCES "${CMAKE_PROJECT_NAME}-test-executable" SOURCES)
+get_filename_component(testExecutableSourceDir "${TEST_EXECUTABLE_SOURCES}" DIRECTORY)
+file(COPY "${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-test/${TEST_EXECUTABLE_SOURCES}" DESTINATION "${PROJECT_BINARY_DIR}/generated/${testExecutableSourceDir}")
+set(PACKAGE_TEST_EXECUTABLE_SOURCES "${PROJECT_BINARY_DIR}/generated/${TEST_EXECUTABLE_SOURCES}")
+
 add_library("${PROJECT_NAME}-lib" STATIC
     ${PACKAGE_TEST_LIB_SOURCES}
 )
@@ -98,7 +111,7 @@ target_link_libraries("${PROJECT_NAME}-lib" PUBLIC
     "${CMAKE_PROJECT_NAME}-lib::${CMAKE_PROJECT_NAME}-lib"
 )
 
-add_executable("${PROJECT_NAME}-executable" "src/test/cpp/main.cpp")
+add_executable("${PROJECT_NAME}-executable" ${PACKAGE_TEST_EXECUTABLE_SOURCES})
 target_link_libraries("${PROJECT_NAME}-executable" PRIVATE
     "${PROJECT_NAME}-lib"
 )
@@ -123,7 +136,7 @@ if("${BUILD_SHARED_LIBS}" AND "${MINGW}")
     endforeach()
 endif()
 
-list(PREPEND PROJECT_PATH_LIST "${CONAN_INSTALL_PREFIX}/bin")
+set(PROJECT_PATH_LIST "${CONAN_INSTALL_PREFIX}/bin")
 cmake_path(
     CONVERT "${PROJECT_PATH_LIST}"
     TO_NATIVE_PATH_LIST PROJECT_NATIVE_PATH_LIST
