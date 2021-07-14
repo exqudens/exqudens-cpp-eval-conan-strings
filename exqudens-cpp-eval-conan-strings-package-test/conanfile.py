@@ -12,6 +12,7 @@ def get_version():
 
 class ConanConfiguration(ConanFile):
     requires = [
+        "exqudens-cpp-test-lib/1.0.0",
         get_name() + "/" + get_version() + "@test-user/test-channel"
     ]
     settings = "arch", "os", "compiler", "build_type"

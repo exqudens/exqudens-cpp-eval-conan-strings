@@ -104,7 +104,7 @@
       }
     },
     {
-      "name": "vs-host-x86-target-x64",
+      "name": "vs-host-x86-target-x86",
       "hidden": true,
       "generator": "Ninja",
       "toolset": {
@@ -112,7 +112,7 @@
         "strategy": "external"
       },
       "architecture": {
-        "value": "x64",
+        "value": "x86",
         "strategy": "external"
       },
       "vendor": {
@@ -144,13 +144,13 @@
       }
     },
     {
-      "name": "ide-vs-host-x86-target-x64-release-shared",
-      "inherits": [ "vs-host-x86-target-x64", "release-shared" ],
+      "name": "ide-vs-host-x86-target-x86-release-shared",
+      "inherits": [ "vs-host-x86-target-x86", "release-shared" ],
       "binaryDir": "${sourceDir}/vs-build/0"
     },
     {
-      "name": "ide-vs-host-x86-target-x64-release-static",
-      "inherits": [ "vs-host-x86-target-x64", "release-static" ],
+      "name": "ide-vs-host-x86-target-x86-release-static",
+      "inherits": [ "vs-host-x86-target-x86", "release-static" ],
       "binaryDir": "${sourceDir}/vs-build/1"
     },
     {
@@ -186,12 +186,12 @@
   ],
   "buildPresets": [
     {
-      "name": "ide-vs-host-x86-target-x64-release-shared",
-      "configurePreset": "ide-vs-host-x86-target-x64-release-shared"
+      "name": "ide-vs-host-x86-target-x86-release-shared",
+      "configurePreset": "ide-vs-host-x86-target-x86-release-shared"
     },
     {
-      "name": "ide-vs-host-x86-target-x64-release-static",
-      "configurePreset": "ide-vs-host-x86-target-x64-release-static"
+      "name": "ide-vs-host-x86-target-x86-release-static",
+      "configurePreset": "ide-vs-host-x86-target-x86-release-static"
     },
     {
       "name": "ide-vs-host-x64-target-x64-release-shared",

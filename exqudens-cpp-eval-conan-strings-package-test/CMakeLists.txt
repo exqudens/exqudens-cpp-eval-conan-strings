@@ -27,6 +27,7 @@ set(CONAN_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/conan-install")
 
 if(DEFINED "CONAN_COMMAND")
     set(CONAN_PACKAGE_NAMES
+        "exqudens-cpp-test-lib"
         "${CMAKE_PROJECT_NAME}-lib"
     )
 
@@ -72,7 +73,10 @@ if(DEFINED "CONAN_COMMAND")
     endif()
 endif()
 
-find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" QUIET CONFIG)
+if(NOT "" STREQUAL "${CMAKE_PREFIX_PATH}")
+    find_package("exqudens-cpp-test-lib" "1.0.0" QUIET CONFIG)
+    find_package("${CMAKE_PROJECT_NAME}-lib" "${CMAKE_PROJECT_VERSION}" QUIET CONFIG)
+endif()
 
 set_not_found_package_names(NOT_FOUND_PACKAGE_NAMES
     ${CONAN_PACKAGE_NAMES}
@@ -108,6 +112,7 @@ target_include_directories("${PROJECT_NAME}-lib" PUBLIC
     "${PROJECT_BINARY_DIR}/generated/src/test/cpp"
 )
 target_link_libraries("${PROJECT_NAME}-lib" PUBLIC
+    "exqudens-cpp-test-lib::exqudens-cpp-test-lib"
     "${CMAKE_PROJECT_NAME}-lib::${CMAKE_PROJECT_NAME}-lib"
 )
 
@@ -148,6 +153,8 @@ add_custom_target("${PROJECT_NAME}"
             env
             "PATH=${PROJECT_NATIVE_PATH_LIST}"
             "$<TARGET_FILE:${PROJECT_NAME}-executable>"
+            --tests
+            all
     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     COMMENT "custom-target: '${PROJECT_NAME}'"
     VERBATIM

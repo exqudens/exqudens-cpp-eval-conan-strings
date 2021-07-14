@@ -6,9 +6,7 @@ namespace exqudens::evaluation {
 
     public:
 
-      static void test1();
-
-      static int run(int argc, char** argv);
+      void test1();
 
   };
 
